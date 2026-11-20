@@ -2,7 +2,7 @@ import { type IconSource, resolveProviderIcon } from '@cherrystudio/ui/icons';
 
 import type { WebSearchProviderId } from '@/shared/data/types/webSearch';
 
-const APP_LOGO = require('@/assets/cherry-studio-logo.png');
+const APP_LOGO = require('@/assets/icon.png');
 const LOCAL_FETCH_ICON: IconSource = { light: APP_LOGO, dark: APP_LOGO };
 
 export function resolveWebSearchProviderIcon(providerId: WebSearchProviderId) {

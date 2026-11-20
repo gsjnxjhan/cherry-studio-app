@@ -22,10 +22,10 @@ import { SettingsScrollPage } from '../components/SettingsScrollPage';
 const APP_VERSION = Application.nativeApplicationVersion?.trim();
 const APP_BUILD = Application.nativeBuildVersion;
 const APP_PROFILE = Constants.expoConfig?.extra?.sentryEnvironment;
-const SUPPORT_EMAIL = 'support@cherry-ai.com';
+const SUPPORT_EMAIL = '';
 const ABOUT_LINKS = {
-  repository: 'https://github.com/CherryHQ/cherry-studio-app',
-  website: 'https://www.cherry-ai.com/',
+  repository: '',
+  website: '',
 } as const;
 
 export default function AboutSettingsScreen() {

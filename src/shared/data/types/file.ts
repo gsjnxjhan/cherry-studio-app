@@ -37,7 +37,7 @@ export type MediaType = z.infer<typeof MediaTypeSchema>;
 export const FALLBACK_MEDIA_TYPE = 'application/octet-stream';
 
 /** File-property author for application-produced documents, separate from AI service identity. */
-export const GENERATED_FILE_AUTHOR = 'Cherry Studio';
+export const GENERATED_FILE_AUTHOR = 'DeepChat';
 
 /**
  * Stable provenance retained after a file leaves its originating message or

@@ -1,18 +1,9 @@
-import { Button, Image, Section, useAlert, useToast } from '@cherrystudio/ui/components';
+import { useToast } from '@cherrystudio/ui/components';
 import { loggerService } from '@logger';
-import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useEffectEvent, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Keyboard, TextInput, View, type TextInputInstance } from 'react-native';
 
-import {
-  accountSignInHref,
-  organizationLabel,
-  rememberAccountReturnTo,
-  useAccount,
-  useAccountErrorReporter,
-} from '@/frontend/appShell/account';
-import { getAppLogo } from '@/frontend/appShell/branding';
 import { AvatarImagePicker, ProfileEditableAvatar } from '@/frontend/components/Avatar';
 import { useBackendModule } from '@/frontend/data';
 import { usePreference } from '@/frontend/data/hooks';
@@ -23,26 +14,13 @@ import { SettingsScrollPage } from '../components/SettingsScrollPage';
 const profileAvatarSize = 96;
 const logger = loggerService.withContext('ProfileSettingsScreen');
 
-/** Branding follows the active space; the card text names its account kind. */
-function AccountTile() {
-  return (
-    <View className="size-10 items-center justify-center overflow-hidden rounded-xl border border-border bg-secondary">
-      <Image accessibilityIgnoresInvertColors className="size-10" source={getAppLogo()} />
-    </View>
-  );
-}
-
-/** The person's avatar, nickname and account: sign in, switch accounts or sign out. */
+/** The person's avatar and nickname. */
 export default function ProfileSettingsScreen() {
   const { t } = useTranslation();
-  const router = useRouter();
   const { toast } = useToast();
-  const { alert } = useAlert();
   const inputRef = useRef<TextInputInstance>(null);
   const [userName, setUserName] = usePreference('app.user.name');
   const profile = useBackendModule('profile');
-  const { account, state } = useAccount();
-  const organization = organizationLabel(state);
   const [nameDraft, setNameDraft] = useState(userName);
   const mutedForegroundColor = useThemeColor('muted-foreground');
   const persistSelectedAvatar = useCallback(
@@ -71,62 +49,6 @@ export default function ProfileSettingsScreen() {
     inputRef.current?.blur();
     Keyboard.dismiss();
   }, []);
-
-  const reportAccountError = useAccountErrorReporter('ProfileSettingsScreen');
-  const openSignIn = () => router.push(accountSignInHref('/settings/profile'));
-  const isSignedIn = state.isSignedIn || state.isEnterprise;
-  // A cloud account switches organization through the portal, reusing its browser sign-in.
-  const canSwitchOrganization = isSignedIn && !state.privateAddress;
-  const switchOrganization = () => {
-    rememberAccountReturnTo('/settings/profile');
-    void account.switchSpace().catch(reportAccountError);
-  };
-  /** Resolves whether the sign-out completed; a failure is reported here. */
-  const signOut = () =>
-    account.signOut().then(
-      () => true,
-      (error: unknown) => {
-        reportAccountError(error);
-        return false;
-      },
-    );
-  const requestSignOut = () => {
-    if (!state.isEnterprise) {
-      // A community sign-out changes no visible content, so it needs no confirmation.
-      void signOut().then((signedOut) => {
-        if (signedOut) toast.show({ label: t('account.signedOutToast'), variant: 'success' });
-      });
-      return;
-    }
-    alert.confirm({
-      confirmLabel: t('account.signOut'),
-      description: t('account.signOutConfirm.description'),
-      onConfirm: () => void signOut(),
-      role: 'destructive',
-      title:
-        organization?.kind === 'organization'
-          ? t('account.signOutConfirm.organizationTitle', { organization: organization.label })
-          : t('account.signOutConfirm.title'),
-    });
-  };
-  const accountName = state.name || state.maskedIdentifier;
-  // One card for every account: what is signed in, and the way to sign in or switch.
-  const card = !isSignedIn
-    ? {
-        title: t('account.notSignedIn'),
-        detail: t('account.signInDescription'),
-      }
-    : state.isEnterprise
-      ? {
-          title: organization?.label ?? t('account.organization'),
-          detail: [
-            accountName,
-            t(state.privateAddress ? 'account.kind.private' : 'account.kind.organization'),
-          ]
-            .filter(Boolean)
-            .join(' · '),
-        }
-      : { title: t('account.cloudAccount'), detail: accountName };
 
   return (
     <SettingsScrollPage
@@ -165,50 +87,6 @@ export default function ProfileSettingsScreen() {
           value={nameDraft}
         />
       </View>
-      <Section title={t('account.title')}>
-        <Section.Item
-          description={card.detail || undefined}
-          label={card.title}
-          leading={<AccountTile />}
-          trailing={
-            <Button
-              disabled={state.isBusy}
-              onPress={canSwitchOrganization ? switchOrganization : openSignIn}
-              size="sm"
-              variant={isSignedIn ? 'tonal' : 'default'}
-            >
-              {t(
-                canSwitchOrganization
-                  ? 'account.switchOrganization'
-                  : isSignedIn
-                    ? 'account.switch'
-                    : 'account.login.signIn',
-              )}
-            </Button>
-          }
-        />
-      </Section>
-      {isSignedIn ? (
-        <Section
-          // Only an organization's data leaves with its sign-out; a community account keeps it.
-          footer={state.isEnterprise ? t('account.signOutConfirm.description') : undefined}
-        >
-          {canSwitchOrganization ? (
-            <Section.Item
-              disabled={state.isBusy}
-              label={t('account.switch')}
-              onPress={openSignIn}
-            />
-          ) : null}
-          <Section.Item
-            destructive
-            disabled={state.isBusy}
-            label={t('account.signOut')}
-            onPress={requestSignOut}
-            showChevron={false}
-          />
-        </Section>
-      ) : null}
     </SettingsScrollPage>
   );
 }

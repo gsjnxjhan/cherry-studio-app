@@ -21,5 +21,5 @@ const PUBLISHED_LOCALES: Partial<Record<AppLanguage, string>> = {
  * anyway, so it stays a complete notice when the device is offline.
  */
 export function getPrivacyPolicyUrl(language: string): string {
-  return `https://cherryai.com.cn/docs/${PUBLISHED_LOCALES[language as AppLanguage] ?? 'en'}/about/privacypolicy/`;
+  return `https://deepchat.app/docs/${PUBLISHED_LOCALES[language as AppLanguage] ?? 'en'}/about/privacypolicy/`;
 }

@@ -78,7 +78,7 @@ export const SkillSourceKindSchema = z.enum(['builtin', 'marketplace']);
 export type SkillSourceKind = z.infer<typeof SkillSourceKindSchema>;
 
 export const CHERRY_SKILL_COMPATIBILITY =
-  'Designed for Cherry Studio App in standard mode with a model that supports tool calling.';
+  'Designed for DeepChat App in standard mode with a model that supports tool calling.';
 
 /** Authoring data, never an instruction activation or a grant of tools. */
 export const CreateSkillInputSchema = z.strictObject({
@@ -91,7 +91,7 @@ export const CreateSkillInputSchema = z.strictObject({
     .max(SKILL_COMPATIBILITY_MAX_LENGTH - CHERRY_SKILL_COMPATIBILITY.length - 1)
     .optional()
     .describe(
-      'Additional environment requirements, such as iOS, configured providers or connected plugins. The app adds the Cherry Studio App requirement.',
+      'Additional environment requirements, such as iOS, configured providers or connected plugins. The app adds the DeepChat App requirement.',
     ),
   allowedTools: z
     .array(z.string().regex(/^[\w.:-]{1,64}$/))

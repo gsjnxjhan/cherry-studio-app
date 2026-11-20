@@ -6,10 +6,10 @@ export const EXPORT_BRAND_LOGOS = {
 
 // Official light/dark app artwork, proportionally downsampled to 96px for offline exports.
 export const EXPORT_BRAND = {
-  brandName: 'Cherry Studio',
+  brandName: 'DeepChat',
   // QR generated from downloadUrl with toqr 0.1.1: EC M, 4-module quiet zone, 8 px/module.
   // Regenerate the embedded PNG whenever the URL changes; exports work offline.
-  downloadUrl: 'https://www.cherryai.com.cn/download?platform=mobile',
+  downloadUrl: '',
   qrCodeDataUrl:
     'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAUgAAAFIAQMAAAAI2vVwAAAABlBMVEX///8AAABVwtN+AAAACXBIWXMAAAPoAAAD6AG1e1JrAAABrklEQVRoge2Zy27DMAwE9/9/egtLfCl1bTK97gYI7GhyGQsSRQOKoijK1+HOugTt/rquIysi2bGE+OY1uC7XeBlZEcmWJa5h02y64zeI/NYS7Doeg8j/WMJGN5j/o0jMLF0x9zGd7U+4Wz9FPlrawc3HRkRiYMnjc9eubwiPSD5YotdSdnWss6y8SDYswW8Lse+2f4ocWWLdh/bw3rGiPvCI7FjCUej7RPYVgjgjEu+WWGor32/yAUDkzBK9NvXF1Sd1bvgi0bVEX1HjlB/y82GIRNcS/PDkamNq/66vKBJvllhaeGd/r/ajrojsWIL/EmQ2pPBRf4rkuyWUI6g3UP46UFEk3i3Bt35bcWOV5ad5kWhYYi6r2X/y+ooiR5Z4FlFRXcUtRGJoiXnYj93KJjQDFMm2JRztuNqEh8ipJeR7kVxqyxtmj0g2LHnieB99qPJUjojkgyV6SRm9p3wHyrP/KRINS9jf56Jq5q+IxMwSa1lqm1dt2XtEcmIJcYgq/+GdeZFsWFrJqb3vmOJFomfpSimoor131v0QiZalHT+JxqnKQIqcWVIURVHG+QHdzqdI6/30bgAAAABJRU5ErkJggg==',
 } as const;

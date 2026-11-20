@@ -8,8 +8,8 @@ import { RecoveryScreen } from './RecoveryScreen';
 const FALLBACK_COPY = {
   'common.retry': 'Retry',
   'recovery.startupFailed.description':
-    'Something stopped the app from starting. Try again. If this keeps happening, close Cherry Studio completely and reopen it.',
-  'recovery.startupFailed.title': "Cherry Studio couldn't start",
+    'Something stopped the app from starting. Try again. If this keeps happening, close DeepChat completely and reopen it.',
+  'recovery.startupFailed.title': "DeepChat couldn't start",
   'enterprise.startupFailed.description':
     'The first visit needs a connection to load your organization’s configuration. Check your network and try again, or sign out.',
   'enterprise.startupFailed.title': "Couldn't reach your organization",
