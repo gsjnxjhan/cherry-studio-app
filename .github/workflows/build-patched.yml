@@ -48,22 +48,35 @@ jobs:
           CI: true
         run: npx expo prebuild --platform android --no-install --clean
 
-      - name: Gradle assembleRelease
+      - name: Gradle assembleRelease (retry)
         working-directory: android
         env:
           PROFILE: production
           GRADLE_OPTS: -Dorg.gradle.jvmargs=-Xmx6g -Dorg.gradle.daemon=false
-        run: ./gradlew :app:assembleRelease -PreactNativeArchitectures=arm64-v8a --stacktrace --no-daemon
+        run: |
+          set -o pipefail
+          for i in 1 2 3; do
+            echo "=== gradle attempt $i ==="
+            if ./gradlew :app:assembleRelease -PreactNativeArchitectures=arm64-v8a --stacktrace --no-daemon; then
+              echo "BUILD_OK"; exit 0
+            fi
+            echo "attempt $i failed, cleaning caches and retrying in 20s"
+            rm -rf ~/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin || true
+            sleep 20
+          done
+          echo "BUILD_FAILED"; exit 1
 
       - name: Collect APK
+        if: success()
         run: |
           find android/app/build/outputs -name "*.apk" -exec ls -lh {} \;
           mkdir -p out
-          cp "$(find android/app/build/outputs/apk/release -name '*.apk' | head -1)" out/cherry-patched.apk
+          cp "$(find android/app/build/outputs/apk/release -name '*.apk' | head -1)" out/deepchat.apk
           ls -lh out
 
       - uses: actions/upload-artifact@v4
+        if: success()
         with:
-          name: cherry-patched-apk
-          path: out/cherry-patched.apk
+          name: deepchat-apk
+          path: out/deepchat.apk
           if-no-files-found: error
