@@ -5,7 +5,6 @@ import DatabaseIcon from '@cherrystudio/app-icons/icons/database';
 import InfoIcon from '@cherrystudio/app-icons/icons/info';
 import LockIcon from '@cherrystudio/app-icons/icons/lock';
 import MicIcon from '@cherrystudio/app-icons/icons/mic';
-import NetworkIcon from '@cherrystudio/app-icons/icons/network';
 import PackageIcon from '@cherrystudio/app-icons/icons/package';
 import Settings2Icon from '@cherrystudio/app-icons/icons/settings-2';
 import ShieldIcon from '@cherrystudio/app-icons/icons/shield';
@@ -16,7 +15,7 @@ import { useTranslation } from 'react-i18next';
 import { Platform, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { accountSignInHref, organizationLabel, useAccount } from '@/frontend/appShell/account';
+import { organizationLabel, useAccount } from '@/frontend/appShell/account';
 import { RouteHeader } from '@/frontend/appShell/header';
 import { CapabilityLabel } from '@/frontend/components/Policy';
 import { usePreference } from '@/frontend/data/hooks';
@@ -57,11 +56,6 @@ export default function SettingsScreen() {
         <ProfileHero
           detail={accountDetail}
           onPress={openProfileSettings}
-          onSignIn={
-            account.isSignedIn || account.isEnterprise
-              ? undefined
-              : () => router.push(accountSignInHref('/settings'))
-          }
           userName={userName}
         />
         <View className="gap-6 px-4 pt-2">
@@ -121,15 +115,10 @@ export default function SettingsScreen() {
               leading={<LockIcon className="size-4 text-foreground" />}
               onPress={() => router.push('/settings/permissions')}
             />
-            <Section.Item
-              label={t('settings.items.deviceConnections')}
-              leading={<NetworkIcon className="size-4 text-foreground" />}
-              onPress={() => router.push('/settings/device-connections')}
-            />
           </Section>
           <Section>
             <Section.Item
-              label={t('settings.data.title')}
+              label="备份与恢复"
               leading={<DatabaseIcon className="size-4 text-foreground" />}
               onPress={() => router.push('/settings/data')}
               testID="settings-data"

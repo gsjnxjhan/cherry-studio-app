@@ -46,7 +46,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
           ? `${config.name} Preview`
           : config.name!,
     slug: config.slug!,
-    scheme: `cherrystudio${suffix.replace('.', '-')}`,
+    scheme: `deepchat${suffix.replace('.', '-')}`,
     updates: {
       ...config.updates,
       enabled: false, // patched: 关闭 OTA，避免官方 JS 包覆盖定制提示词
@@ -91,8 +91,6 @@ export default ({ config }: ConfigContext): ExpoConfig => {
       '@siteed/sherpa-onnx.rn',
       './plugins/withDiagnostics',
       './plugins/withCloudSigning',
-      './modules/crash-reporting/app.plugin.js',
-      './scripts/withReportingAutolinking.js',
     ]
       .filter((plugin) => {
         const name = Array.isArray(plugin) ? plugin[0] : plugin;
