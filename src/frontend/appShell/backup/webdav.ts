@@ -1,6 +1,6 @@
 /**
- * DeepChat: WebDAV 备份上传 / 最新备份下载。
- * 只搬运 BackupRuntime 产出的 zip，不解析内容；API Key 存 secure-store，不进备份。
+ * DeepChat: WebDAV 备份/恢复。
+ * 配置存本地 JSON（不含 API Key）；备份包直接搬运 BackupRuntime 的 zip。
  */
 import { File, Paths } from 'expo-file-system';
 
@@ -15,7 +15,35 @@ type BackupPort = {
   createBackup(): Promise<{ uri: string; filename: string }>;
 };
 
+const CONFIG_NAME = 'deepchat-webdav.json';
 const TIMEOUT_MS = 60_000;
+
+function configFile(): File {
+  return new File(Paths.document, CONFIG_NAME);
+}
+
+export function loadConfig(): WebDavConfig | null {
+  const file = configFile();
+  if (!file.exists) return null;
+  try {
+    const raw = JSON.parse(file.textSync()) as Partial<WebDavConfig>;
+    if (!raw.baseUrl || !raw.username) return null;
+    return {
+      baseUrl: raw.baseUrl,
+      username: raw.username,
+      password: raw.password ?? '',
+      directory: raw.directory ?? '/deepchat',
+    };
+  } catch {
+    return null;
+  }
+}
+
+export function saveConfig(cfg: WebDavConfig): void {
+  const file = configFile();
+  if (file.exists) file.delete();
+  file.write(JSON.stringify(cfg));
+}
 
 function joinUrl(base: string, dir: string, name: string): string {
   const b = base.replace(/\/+$/, '');
@@ -28,11 +56,13 @@ function authHeader(cfg: WebDavConfig): string {
 }
 
 async function ensureCollection(cfg: WebDavConfig): Promise<void> {
-  const url = joinUrl(cfg.baseUrl, cfg.directory, '');
   try {
-    await fetch(url, { method: 'MKCOL', headers: { Authorization: authHeader(cfg) } });
+    await fetch(joinUrl(cfg.baseUrl, cfg.directory, ''), {
+      method: 'MKCOL',
+      headers: { Authorization: authHeader(cfg) },
+    });
   } catch {
-    /* 目录已存在时服务器返回 405；后续 PUT 会暴露真实错误 */
+    /* 目录已存在时返回 405；PUT 阶段会暴露真实错误 */
   }
 }
 
@@ -40,16 +70,13 @@ async function ensureCollection(cfg: WebDavConfig): Promise<void> {
 export async function uploadBackup(cfg: WebDavConfig, backup: BackupPort): Promise<string> {
   const { uri, filename } = await backup.createBackup();
   await ensureCollection(cfg);
-  const target = joinUrl(cfg.baseUrl, cfg.directory, filename);
-
-  const file = new File(uri);
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
   try {
-    const res = await fetch(target, {
+    const res = await fetch(joinUrl(cfg.baseUrl, cfg.directory, filename), {
       method: 'PUT',
       headers: { Authorization: authHeader(cfg), 'Content-Type': 'application/zip' },
-      body: await file.bytes(),
+      body: await new File(uri).bytes(),
       signal: controller.signal,
     });
     if (!res.ok) throw new Error(`WebDAV PUT ${res.status}`);
@@ -63,8 +90,7 @@ type Entry = { href: string; lastmod: string };
 
 function parseEntries(xml: string): Entry[] {
   const out: Entry[] = [];
-  const responses = xml.split(/<(?:\w+:)?response>/i).slice(1);
-  for (const chunk of responses) {
+  for (const chunk of xml.split(/<(?:\w+:)?response>/i).slice(1)) {
     const href = chunk.match(/<(?:\w+:)?href>([^<]+)</i);
     if (!href) continue;
     const name = decodeURIComponent(href[1]);
@@ -75,10 +101,9 @@ function parseEntries(xml: string): Entry[] {
   return out;
 }
 
-/** 下载目录里最新的 .zip 到缓存，返回本地 uri。 */
+/** 下载目录里最新的 zip 到缓存，返回本地 uri。 */
 export async function downloadLatestBackup(cfg: WebDavConfig): Promise<string> {
-  const dirUrl = joinUrl(cfg.baseUrl, cfg.directory, '');
-  const res = await fetch(dirUrl, {
+  const res = await fetch(joinUrl(cfg.baseUrl, cfg.directory, ''), {
     method: 'PROPFIND',
     headers: {
       Authorization: authHeader(cfg),
@@ -94,8 +119,10 @@ export async function downloadLatestBackup(cfg: WebDavConfig): Promise<string> {
   entries.sort((a, b) => Date.parse(b.lastmod || '0') - Date.parse(a.lastmod || '0'));
 
   const newest = entries[0];
-  const fileUrl = newest.href.startsWith('http') ? newest.href : new URL(newest.href, cfg.baseUrl).toString();
-  const dl = await fetch(fileUrl, { headers: { Authorization: authHeader(cfg) } });
+  const url = newest.href.startsWith('http')
+    ? newest.href
+    : new URL(newest.href, cfg.baseUrl).toString();
+  const dl = await fetch(url, { headers: { Authorization: authHeader(cfg) } });
   if (!dl.ok) throw new Error(`WebDAV GET ${dl.status}`);
 
   const target = new File(Paths.cache, newest.href.split('/').pop() || 'backup.zip');
