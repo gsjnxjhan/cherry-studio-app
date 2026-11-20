@@ -49,7 +49,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     scheme: `cherrystudio${suffix.replace('.', '-')}`,
     updates: {
       ...config.updates,
-      enabled: profile !== 'development' && process.env.EXPO_PUBLIC_STORYBOOK_ENABLED !== 'true',
+      enabled: false, // patched: 关闭 OTA，避免官方 JS 包覆盖定制提示词
     },
     ios: {
       ...config.ios,
