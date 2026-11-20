@@ -138,7 +138,8 @@
         "android.permission.ACCESS_NETWORK_STATE",
         "android.permission.WAKE_LOCK",
         "android.permission.POST_NOTIFICATIONS",
-        "android.permission.WRITE_EXTERNAL_STORAGE"
+        "android.permission.FOREGROUND_SERVICE",
+        "android.permission.FOREGROUND_SERVICE_DATA_SYNC"
       ]
     },
     "web": {
